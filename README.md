@@ -31,6 +31,12 @@ Extra features:
 * Simple taxi - when the player presses their horn (/ defined hotkey), NPCs will enter their vehicle and after a while will pay for their ride and leave
 
 
+## Support my work
+
+Many hours have been spent scripting and testing this mod, if you would like to support this and future work, you can use the secure PayPal link below (:
+
+[![paypal](https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=9QZ34DQCEPAGG)
+
 
 ## Installation
 
