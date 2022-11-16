@@ -5,7 +5,8 @@ Inspired by R3QQ's Family Friendly Free Roaming (FFFR) Mod for GTA 5 Single Play
 
 The mod includes many configurable features providing the opportunity to supress and remove all violent and disturbing encounters/game mechanics, effectively turning the game into a peaceful free-roam driving game, free of death, violence and injury, with the possibility of playing with friends and family.
 
-# Features
+
+## Features
 
 All features can be turned on or off in the config, many have different options to tweak the feature to your liking.
 
@@ -31,11 +32,16 @@ Extra features:
 * Simple taxi - when the player presses their horn (/ defined hotkey), NPCs will enter their vehicle and after a while will pay for their ride and leave
 
 
-## Support my work
+## Support
+### Donate
 
 Many hours have been spent scripting and testing this mod, if you would like to support this and future work, you can use the secure PayPal link below (:
 
 [![paypal](https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=9QZ34DQCEPAGG)
+
+### Discord
+
+For updates, support and suggestions, join the [Discord]() COMING SOON.
 
 
 ## Installation
@@ -49,7 +55,6 @@ Many hours have been spent scripting and testing this mod, if you would like to 
   ensure NativeUiLua
   ensure FiveM-Kid-Friendly
 ```
-    
 
 
 ## FAQ
