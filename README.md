@@ -49,7 +49,7 @@ For updates, support and suggestions, join the [Discord]() COMING SOON.
 
 ## Installation
 
-* Download the [latest release]() COMING SOON
+* Download the [latest release](https://github.com/92jackson/fivem-kid-friendly-mod/releases)
 * Copy ``` FiveM-Kid-Friendly ``` to your ``` resource ``` folder
 * Copy ``` NativeUI ``` to your ``` resource ``` folder (for completeness, NativeUI is included in the release download)
 * Add the following to your server.cfg:
