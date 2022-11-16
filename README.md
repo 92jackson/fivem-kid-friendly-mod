@@ -1,7 +1,7 @@
 
 # FiveM Kid Friendly Mod
 
-Inspired by R3QQ's Family Friendly Free Roaming (FFFR) Mod for GTA 5 Single Player, this mod brings a safer/more age appropriate GTA experience for children to FiveM.
+Inspired by R3QQ's Family Friendly Free Roaming (FFFR) mod for GTA 5 Single Player, this mod brings a safer/more age appropriate GTA experience for children to FiveM.
 
 The mod includes many configurable features providing the opportunity to supress and remove all violent and disturbing encounters/game mechanics, effectively turning the game into a peaceful free-roam driving game, free of death, violence and injury, with the possibility of playing with friends and family.
 
@@ -12,13 +12,16 @@ All features can be turned on or off in the config, many have different options 
 
 Main features:
 
-* Player and NPC invincibility, with gore and blood removed
+* Players and NPCs are invincible, with gore and blood removed
 * Players and NPCs cannot be run-down
+* Players and NPCs don't ragdoll (fall over)
 * Removal of all weapons
-* NPCs ignore players and are calmer in traffic (including cops)
-* Carjacking replaced by NPCs willingly giving up their vehicle to you
+* NPCs ignore Players and are calmer in traffic (including cops)
+* Friendly carjacking - NPCs willingly leave their vehicle to the Player
+* NPCs cannot carjack
 * Removal of all inappropriate ped models
-* Parental timer - set a max time the game can be played for, a timer will appear on the screen, on expiry the game will end
+* All NPC speech is muted
+* Parental timer - a parent can set a max time the game can be played for. A timer will appear on the screen, on expiry the game will end
 
 Extra features:
 
@@ -48,12 +51,12 @@ For updates, support and suggestions, join the [Discord]() COMING SOON.
 
 * Download the [latest release]() COMING SOON
 * Copy ``` FiveM-Kid-Friendly ``` to your ``` resource ``` folder
-* Copy ``` NativeUiLua ``` to your ``` resource ``` folder
+* Copy ``` NativeUI ``` to your ``` resource ``` folder (for completeness, NativeUI is included in the release download)
 * Add the following to your server.cfg:
 
 ```bash
-  ensure NativeUiLua
-  ensure FiveM-Kid-Friendly
+  start NativeUI
+  start FiveM-Kid-Friendly
 ```
 
 
@@ -70,4 +73,4 @@ For updates, support and suggestions, join the [Discord]() COMING SOON.
 
 #### **Q2:** I run a FiveM server, can I use this script online?
 
-**A2:** Yes, it will work. But be warned, this script was intended for local host use and therefore does not employ any anti-cheat/hack preventions, given that this script is intended to provide a safe gaming experience for children, I highly recommend that you look into adding safety nets via third party script(s).
+**A2:** Yes, it will work. But be warned, this script was intended for local host use and therefore does not employ any anti-cheat/hack preventions, given that this script is intended to provide a safe gaming experience for children, I highly recommend that you look into adding safety nets via a third party script(s).
