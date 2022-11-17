@@ -1,7 +1,7 @@
 
 # FiveM Kid Friendly Mod
 
-Inspired by R3QQ's Family Friendly Free Roaming (FFFR) mod for GTA 5 Single Player, this mod brings a safer/more age appropriate GTA experience for children to FiveM.
+Inspired by [R3QQ's Family Friendly Free Roaming (FFFR)](https://sites.google.com/view/r3qq/family-friendly-free-roaming/fffr-3-0) mod for GTA 5 Single Player, this mod brings a safer/more age appropriate GTA experience for children to FiveM.
 
 The mod includes many configurable features providing the opportunity to supress and remove all violent and disturbing encounters/game mechanics, effectively turning the game into a peaceful free-roam driving game, free of death, violence and injury, with the possibility of playing with friends and family.
 
