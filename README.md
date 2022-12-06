@@ -44,7 +44,7 @@ Many hours have been spent scripting and testing this mod, if you would like to 
 
 ### Discord
 
-For updates, support and suggestions, join the [Discord](https://discord.gg/8uhcgzGQ).
+For updates, support and suggestions, join the [Discord](https://discord.gg/e3eXGTJbjx).
 
 
 ## Installation
