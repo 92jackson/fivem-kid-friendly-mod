@@ -1,9 +1,8 @@
-
 # FiveM Kid Friendly Mod
 
-Inspired by [R3QQ's Family Friendly Free Roaming (FFFR)](https://sites.google.com/view/r3qq/family-friendly-free-roaming/fffr-3-0) mod for GTA 5 Single Player, this mod brings a safer/more age appropriate GTA experience for children to FiveM.
+Inspired by [R3QQ's Family Friendly Free Roaming (FFFR)](https://sites.google.com/view/r3qq/family-friendly-free-roaming/fffr-3-0) mod for GTA 5 Single Player, this mod gives server owners the ability to limit/supress/remove game mechanics not suitable for their target audience, as well as providing features which make the game easier to play for that audience.
 
-The mod includes many configurable features providing the opportunity to supress and remove all violent and disturbing encounters/game mechanics, effectively turning the game into a peaceful free-roam driving game, free of death, violence and injury, with the possibility of playing with friends and family.
+This mod was originally developed to provide a child-friendly experience for both of my sons.
 
 
 ## Features
@@ -12,19 +11,19 @@ All features can be turned on or off in the config, many have different options 
 
 Main features:
 
-* Players and NPCs are invincible, with gore and blood removed
-* Players and NPCs cannot be run-down
-* Players and NPCs don't ragdoll (fall over)
-* Removal of all weapons
-* NPCs ignore Players and are calmer in traffic (including cops)
+* Players and NPCs can be set invincible, with gore and blood removed
+* Ability to disable Players and NPCs from being run-down
+* Ability to disable Players and NPCs from ragdolling (fall over)
+* Can remove of all weapons, make them ineffective, or limit to permitted weapons only
+* NPCs can be set to ignore Players (including cops)
 * Friendly carjacking - NPCs willingly leave their vehicle to the Player
-* NPCs cannot carjack
-* Removal of all inappropriate ped models
-* All NPC speech is muted
-* Parental timer - a parent can set a max time the game can be played for. A timer will appear on the screen, on expiry the game will end
+* Ability to block NPC from carjacking
+* All inappropriate ped models can be removed
+* All NPC speech can be muted
 
 Extra features:
 
+* Parental timer - a parent can set a max time the game can be played for. A timer will appear on the screen, on expiry the game will end
 * Simple trainer - with options to spawn vehicles, swap the player ped, change the weather, and more
 * Teleport to other active players (hotkey or trainer)
 * Active player blips and visual markers
@@ -33,6 +32,10 @@ Extra features:
 * Clone vehicle (hotkey or trainer)
 * Simple emote (hotkey) - plays one of several select emotes on each press
 * Simple taxi - when the player presses their horn (/ defined hotkey), NPCs will enter their vehicle and after a while will pay for their ride and leave
+* Enter an NPC's vehicle as a passenger
+* Change time and weather
+* Quick spawn vehicles (hotkey)
+
 
 
 ## Support
@@ -51,20 +54,18 @@ For updates, support and suggestions, join the [Discord](https://discord.gg/e3eX
 
 * Download the [latest release](https://github.com/92jackson/fivem-kid-friendly-mod/releases)
 * Copy ``` FiveM-Kid-Friendly ``` to your ``` resource ``` folder
-* Copy ``` NativeUI ``` to your ``` resource ``` folder (for completeness, NativeUI is included in the release download)
 * Add the following to your server.cfg:
 
 ```bash
-  start NativeUI
   start FiveM-Kid-Friendly
 ```
 
 
 ## FAQ
 
-#### **Q1:** I have FiveM, but I don't run a server, can I use this mod?
+#### **Q1:** Can I run this mod locally without running a server?
 
-**A1:** While it is possible to run scripts locally without a server enviorment, it's not recommended. Check out the following guides to get a local server set up on your PC (accessible by computers on your local network):
+**A1:** While it is possible to run scripts locally without a server environment, it's not recommended. Check out the following guides to get a local server set up on your PC (accessible by computers on your local network):
 
 * Local server with split-screen/dual screen support:
     - [YouTube - video guide](https://youtu.be/BvIIO0J50Zk)
@@ -73,4 +74,6 @@ For updates, support and suggestions, join the [Discord](https://discord.gg/e3eX
 
 #### **Q2:** I run a FiveM server, can I use this script online?
 
-**A2:** Yes, it will work. But be warned, this script was intended for local host use and therefore does not employ any anti-cheat/hack preventions, given that this script is intended to provide a safe gaming experience for children, I highly recommend that you look into adding safety nets via a third party script(s).
+**A2:** ~~Yes, it will work. But be warned, this script was intended for local host use and therefore does not employ any anti-cheat/hack preventions, given that this script is intended to provide a safe gaming experience for children, I highly recommend that you look into adding safety nets via a third party script(s).~~
+
+As of version 0.2.1, there are anti-cheat/hack preventions, see ```NETWORK_PROTECTION``` in the config.
