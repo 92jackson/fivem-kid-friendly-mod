@@ -290,7 +290,7 @@ CONFIG = {
 --	Parental controls, accessable via the trainer
 ----	To disable completely, see CONFIG.TRAINER.allow_parental_controls
 	PARENTAL = {
-		timer_server_wide = true, -- CAUTION, this should only be used on LOCAL servers!! This will make all set timer, pause timer, and cancel timer events sync with all connected players
+		timer_server_wide = false, -- CAUTION, this should only be used on LOCAL servers!! This will make all set timer, pause timer, and cancel timer events sync with all connected players
 		timer_allow_pause_break = true, -- Players pausing their game will pause the set timer (if the player starts navigating the pause menu - for example, starts checking the map, the timer will resume)
 		timer_end_with_blackout = true, -- Blackout the screen when the timer runs out
 		timer_interval_warnings = true -- Flash the remaining time in the middle of the screen at intervals when close to tine running out
