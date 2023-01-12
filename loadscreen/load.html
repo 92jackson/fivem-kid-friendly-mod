@@ -1,0 +1,106 @@
+<!--
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+-- KID FRIENDLY MOD for FiveM by Jackson92 --------------------------------------------------------
+-----FOR NORMAL USE, YOU SHOULD NOT NEED TO EDIT PAST THIS POINT!----------------------------------
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+-- Github:	https://github.com/92jackson/fivem-kid-friendly-mod -----------------------------------
+-- Discord:	https://discord.gg/e3eXGTJbjx (join for support, feedback, fixes, updates etc) --------
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+-->
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>FiveM Kid Friendly Mod | Server Load Screen</title>
+		
+		<link href='http://fonts.googleapis.com/css?family=Indie Flower|Comfortaa' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+		<link rel="stylesheet" href="./assets/scripts/main.css">
+		
+		<script src="./config.js"></script>
+		<script src="./assets/scripts/main.js"></script>
+	</head>
+	<body>
+		<div id="fullScreenBg">
+			<div class="fullscreenVideo"></div>
+			
+			<audio class="music" loop>
+				<source src="assets/bg/bg_music.mp3" type="audio/mpeg">
+			</audio>
+			
+			<div class="static"></div>
+			
+			<div class="animatedWrapper">
+				<div class="animated"></div>
+				<div class="animated bg2"></div>
+				<div class="animated bg3"></div>
+			</div>
+		</div>
+		
+		<div id="volumeIndicator">
+			<a>
+				<div class="indicatorContainer">
+					<i class="on fa-solid fa-volume-high active"></i>
+					<i class="off fa-solid fa-volume-xmark"></i>
+				</div>
+				<span class="control"><b>SPACEBAR</b></span>
+			</a>
+		</div>
+		
+		<div id="socials"></div>
+		
+		<div id="wrapper">
+			<h1 id="header"><span class="text">Hello, <span class="player">Player</span></span> <span class="emoji">&#128512;</span></h1>
+			<table class="container">
+				<tr>
+					<td>
+						<nav>
+							<a href="#server" class="link server tab1"><img src="assets/nav/server.png" /></a>
+							<a href="#features" class="link features tab2"><img src="assets/nav/features.png" /></a>
+							<a href="#rules" class="link rules tab3"><img src="assets/nav/rules.png" /></a>
+							<a href="#team" class="link team tab4"><img src="assets/nav/team.png" /></a>
+							<a href="#fkfm" class="link bottom fkfm tab5"><img src="assets/nav/fkfm.png" /></a>
+						</nav>
+					</td>
+					<td class="contentArea">
+						<div class="content">
+							<div class="item item1" id="server">
+								<div class="line line1"></div>
+								<div class="line line2"></div>
+								<div class="line line3"></div>
+							</div>
+							<div class="item item2" id="features">
+								<div class="line line1"></div>
+								<div class="line line2"></div>
+								<div class="line line3"></div>
+							</div>
+							<div class="item item3" id="rules">
+								<div class="line line1"></div>
+								<div class="line line2"></div>
+								<div class="line line3"></div>
+							</div>
+							<div class="item item4" id="team">
+								<div class="line line1"></div>
+								<div class="line line2"></div>
+								<div class="line line3"></div>
+							</div>
+							<div class="item item5" id="fkfm">
+								<h2><small>This server is running the</small><br/>FiveM <b class="multicolour">Kid Friendly Mod</b></h2>
+								
+								<p>The mod aims to assist server owners in providing a safe place for their players to freeroam and have fun with friends, restricting, managing and removing content which may be inappropriate to their target audience.</p>
+								<p>For support and requests, join the Discord:&nbsp; <a onClick="openUrl('https://discord.gg/e3eXGTJbjx')" title="Click to join (opens in browser).">discord.gg/e3eXGTJbjx</a></p>
+								<p><i><small class="warn">Results depend largely on the configuration implemented by the server.<br/><u>Parernts</u> of young children seeking to play are advised to test beforehand and monitor throughout, to ensure suitability. This mod will unlikely ever remove 100% of all adult content.</small></i></p>
+							</div>
+						</div>
+						<div id="connecting">
+							<progress max="100" min="0" value="0"></progress>
+							<div class="text">You're currently joining <span class="serverAddress">UNKNOWN</span>, please wait<span class="loading"></span></div>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</body>
+</html>
