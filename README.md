@@ -23,6 +23,7 @@ Main features:
 
 Extra features:
 
+* Loading screen
 * Parental timer - a parent can set a max time the game can be played for. A timer will appear on the screen, on expiry the game will end
 * Simple trainer - with options to spawn vehicles, swap the player ped, change the weather, and more
 * Teleport to other active players (hotkey or trainer)
