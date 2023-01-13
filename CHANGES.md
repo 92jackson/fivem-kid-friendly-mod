@@ -1,5 +1,10 @@
 # FiveM Kid Friendly Mod Change List
 
+**v0.2.2**
+* Fixed incorrect handling of dropped network players
+* Hotkeys ignored if weapon wheel HUD currently active
+* Fixed handling of the "enter vehicle as passenger" function if the driver is a player
+
 **v0.2.1**
 * **Supports OneSync** (if you preveiously used ```set onesync off``` in your server.cfg, change this to ```+set onesync on```)
 * Added a fully configurable loading screen
