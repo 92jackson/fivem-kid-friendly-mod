@@ -488,7 +488,7 @@ end
 function SetNpcAsDriverForPlayer(Vehicle, SeatPlayerEntering)
 	if IsVarSetTrue(Vehicle) then
 		local Driver = GetPedInVehicleSeat(Vehicle, -1)
-		if DoesEntityExist(Driver) then
+		if DoesEntityExist(Driver) and not IsPedAPlayer(Driver) then
 			SetEntityAsMissionEntity(Vehicle, false, false)
 			SetEntityAsMissionEntity(Driver, false, false)
 			
@@ -505,7 +505,7 @@ function SetNpcAsDriverForPlayer(Vehicle, SeatPlayerEntering)
 			end
 			
 			if not IsVehicleStopped(Vehicle) then TaskVehicleTempAction(Driver, Vehicle, 6, 2) end
-		elseif CONFIG.VEHICLES.all_unlocked then
+		elseif CONFIG.VEHICLES.all_unlocked and not DoesEntityExist(Driver) then
 			SetVehicleDoorsLocked(Vehicle, 1)
 		end
 		
@@ -513,7 +513,7 @@ function SetNpcAsDriverForPlayer(Vehicle, SeatPlayerEntering)
 		TaskEnterVehicle(PlayerPed, Vehicle, 10000, SeatPlayerEntering, 2.0, 1, 0)
 		SetPedConfigFlag(PlayerPed, 184, true) -- CPED_CONFIG_FLAG_PreventAutoShuffleToDriversSeat
 		
-		if DoesEntityExist(Driver) then
+		if DoesEntityExist(Driver) and not IsPedAPlayer(Driver) then
 			Citizen.CreateThread(function()
 				while not PlayerVehicle.is_inside and PlayerVehicle.vehicle == Vehicle do
 					Wait(100)
@@ -529,7 +529,7 @@ function SetNpcAsDriverForPlayer(Vehicle, SeatPlayerEntering)
 		PlayerPassengerInVehicle = Vehicle
 	elseif IsVarSetTrue(PlayerPassengerInVehicle) then
 		local Driver = GetPedInVehicleSeat(PlayerPassengerInVehicle, -1)
-		if DoesEntityExist(Driver) then
+		if DoesEntityExist(Driver) and not IsPedAPlayer(Driver) then
 			SetPedCanBeDraggedOut(Driver, not CONFIG.NPC.cant_carjack)
 			
 			SetEntityCleanupByEngine(PlayerPassengerInVehicle, true)
@@ -666,7 +666,9 @@ function TaskPlayerPerformFriendlyCarjack(Vehicle, Ped, NetworkPlayer)
 end
 
 function IsPlayerAGhost(ActivePlayer)
-	if CONFIG.TRAINER.allow_ghost_to_others and ActivePlayers[ActivePlayer].is_ghost then return true end
+	if DoesSetContain(ActivePlayers, ActivePlayer) then
+		if CONFIG.TRAINER.allow_ghost_to_others and ActivePlayers[ActivePlayer].is_ghost then return true end
+	end
 	return false
 end
 
@@ -1583,7 +1585,7 @@ RegisterNetEvent("ActivePlayerDropped")
 AddEventHandler("ActivePlayerDropped", function(Player)
 	d_print("Active player has dropped:  " .. Player .. ",  adjusting ActivePlayers list and purging blips and FX")
 	
-	RemoveFromSet(ActivePlayers, Player)
+	RemoveFromSet(ActivePlayers, Player, true)
 	PurgePlayerBlip(Player)
 	PurgeAllPlayerFx()
 end)
@@ -1804,7 +1806,12 @@ function RunHotkey(RunFunction, ComboButton, RunOnExit, OnlyRunIfClear)
 	if ComboButton ~= nil then ComboKeyPressed[RunFunction][ComboButton] = not ComboKeyPressed[RunFunction][ComboButton] end
 	
 	local isClear = true
-	if OnlyRunIfClear and ((CONFIG.TRAINER.allow_trainer and _menuPool:IsAnyMenuOpen()) or IsPauseMenuActive()) then isClear = false end
+	if OnlyRunIfClear 
+		and ((CONFIG.TRAINER.allow_trainer and _menuPool:IsAnyMenuOpen()) 
+			or IsPauseMenuActive()
+			or IsHudComponentActive(19)) then
+				isClear = false
+	end
 	
 	if isClear
 		and (ComboButton == nil
@@ -2624,10 +2631,6 @@ Citizen.CreateThread(function()
 			if next(ActivePlayers) ~= nil then
 				for ActivePlayer,Data in pairs(ActivePlayers) do
 					local ActivePlayerPed = GetEntityFromNetwork(Data.ped)
-					
-					if not IsPedAPlayer(ActivePlayerPed) then
-						ActivePlayers[ActivePlayer] = nil
-					end
 					
 					if CONFIG.NETWORK.show_static_line_marker and not IsPlayerAGhost(ActivePlayer) then
 						local ActivePlayerCoords = nil
