@@ -75,6 +75,6 @@ For updates, support and suggestions, join the [Discord](https://discord.gg/e3eX
 
 #### **Q2:** I run a FiveM server, can I use this script online?
 
-**A2:** ~~Yes, it will work. But be warned, this script was intended for local host use and therefore does not employ any anti-cheat/hack preventions, given that this script is intended to provide a safe gaming experience for children, I highly recommend that you look into adding safety nets via a third party script(s).~~
+**A2:** Yes, ~~it will work. But be warned, this script was intended for local host use and therefore does not employ any anti-cheat/hack preventions, given that this script is intended to provide a safe gaming experience for children, I highly recommend that you look into adding safety nets via a third party script(s).~~
 
-As of version 0.2.1, there are anti-cheat/hack preventions, see ```NETWORK_PROTECTION``` in the config.
+As of version 0.2.1, there are anti-cheat/hack preventions, see ```NETWORK_PROTECTION``` in the ```config.lua``` to prevent players spawning in inappropriate vehicles/peds/objects.
