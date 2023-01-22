@@ -1906,7 +1906,8 @@ function SetHotkeys(RunFunction, ControllerOne, ControllerTwo, Keyboard, Descrip
 	else RegisterKeyMapping("+" .. RunFunction .. "_cntrl_2" .. CONFIG.HOTKEY_VER, Description .. " controller" .. Combo2Suffix, "pad_digitalbutton", ControllerTwo) end
 	if IsVarSetTrue(Keyboard) then RegisterKeyMapping("+" .. RunFunction .. "_kb" .. CONFIG.HOTKEY_VER, Description .. " keyboard", "keyboard", Keyboard) end
 
-	RegisterCommand("+" .. RunFunction .. "_kb" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, nil, OnlyRunIfClear) end, false)
+	RegisterCommand("+" .. RunFunction .. "_kb" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, nil, false, OnlyRunIfClear) end, false)
+	RegisterCommand("-" .. RunFunction .. "_kb" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, nil, RunOnDepress, OnlyRunIfClear) end, false)
 	RegisterCommand("+" .. RunFunction .. "_cntrl_1" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, 1, false, OnlyRunIfClear) end, false)
 	RegisterCommand("-" .. RunFunction .. "_cntrl_1" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, 1, RunOnDepress, OnlyRunIfClear) end, false)
 	RegisterCommand("+" .. RunFunction .. "_cntrl_2" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, 2, false, OnlyRunIfClear) end, false)
