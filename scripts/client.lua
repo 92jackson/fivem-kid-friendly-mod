@@ -256,7 +256,9 @@ function SetWeaponHandling(Ped, Vehicle)
 			DisablePlayerFiring(PlayerID, true)
 			SetDisableAmbientMeleeMove(PlayerID, true)
 			--HudWeaponWheelIgnoreControlInput(true)
-		elseif CONFIG.PLAYERS.disable_close_combat then
+		end
+		
+		if CONFIG.PLAYERS.disable_close_combat then
 			if GetSelectedPedWeapon(Ped) == GetHashKey('weapon_unarmed') then
 				DisableControlAction(0, 25, true) -- INPUT_AIM
 				DisableControlAction(0, 141, true) -- INPUT_MELEE_ATTACK_HEAVY
@@ -1530,6 +1532,7 @@ function PurgePlayerBlip(ActivePlayer, ForceRefresh)
 		end
 		
 		if not DoesSetContain(ActivePlayers, ActivePlayer)
+			or not DoesBlipExist(ActivePlayerBlips[ActivePlayer].blip)
 			or (ActivePlayerBlips[ActivePlayer].on_entity and not DoesEntityExist(ActivePlayerPed))
 			or (not ActivePlayerBlips[ActivePlayer].on_entity and DoesEntityExist(ActivePlayerPed))
 			or IsPlayerAGhost(ActivePlayer) then
@@ -1561,6 +1564,7 @@ function PurgeAllPlayerFx()
 			if ActivePlayers[ActivePlayer] ~= nil then ActivePlayerPed = GetEntityFromNetwork(ActivePlayers[ActivePlayer].ped) end
 			
 			if not DoesEntityExist(ActivePlayerPed)
+				or not DoesParticleFxLoopedExist(Fx)
 				or not IsPedAPlayer(ActivePlayerPed)
 				or IsPlayerAGhost(ActivePlayer) then
 					d_print("Dropping FX for player:  " .. ActivePlayer .. ", FX:  ".. Fx)
@@ -1803,7 +1807,7 @@ local ComboKeyPressed = {
 }
 
 function RunHotkey(RunFunction, ComboButton, RunOnExit, OnlyRunIfClear)
-	if ComboButton ~= nil then ComboKeyPressed[RunFunction][ComboButton] = not ComboKeyPressed[RunFunction][ComboButton] end
+	if ComboButton < 3 then ComboKeyPressed[RunFunction][ComboButton] = not ComboKeyPressed[RunFunction][ComboButton] end
 	
 	local isClear = true
 	if OnlyRunIfClear 
@@ -1814,15 +1818,16 @@ function RunHotkey(RunFunction, ComboButton, RunOnExit, OnlyRunIfClear)
 	end
 	
 	if isClear
-		and (ComboButton == nil
+		and (ComboButton == 3
+		or (ComboButton == 4 and RunOnExit)
 		or (ComboKeyPressed[RunFunction][1] and ComboKeyPressed[RunFunction][2])
-		or (RunOnExit and ComboButton ~= nil and not ComboKeyPressed[RunFunction][1] and not ComboKeyPressed[RunFunction][2])) then
+		or (RunOnExit and ComboButton < 3 and not ComboKeyPressed[RunFunction][1] and not ComboKeyPressed[RunFunction][2])) then
 			if RunFunction == "trainer_toggle" then
 				mainMenu:Visible(not mainMenu:Visible())
 			elseif RunFunction == "trainer_parental" then
-				if ComboButton == nil then AllowParentalControl = not AllowParentalControl end
-				if ComboKeyPressed["trainer_parental"][1] and ComboKeyPressed["trainer_parental"][2] then AllowParentalControl = true end
-				if RunOnExit and ComboButton ~= nil and not ComboKeyPressed["trainer_parental"][1] and not ComboKeyPressed["trainer_parental"][2] then AllowParentalControl = false end
+				if ComboButton > 2 then AllowParentalControl = not AllowParentalControl
+				elseif ComboKeyPressed["trainer_parental"][1] and ComboKeyPressed["trainer_parental"][2] then AllowParentalControl = true
+				elseif RunOnExit and ComboButton < 3 and not ComboKeyPressed["trainer_parental"][1] and not ComboKeyPressed["trainer_parental"][2] then AllowParentalControl = false end
 			elseif RunFunction == "teleport_to_player" then
 				if TableLength(ActivePlayerBlips) == 0 then TeleportToWaypoint() 
 				else TeleportToPlayer() end
@@ -1906,8 +1911,8 @@ function SetHotkeys(RunFunction, ControllerOne, ControllerTwo, Keyboard, Descrip
 	else RegisterKeyMapping("+" .. RunFunction .. "_cntrl_2" .. CONFIG.HOTKEY_VER, Description .. " controller" .. Combo2Suffix, "pad_digitalbutton", ControllerTwo) end
 	if IsVarSetTrue(Keyboard) then RegisterKeyMapping("+" .. RunFunction .. "_kb" .. CONFIG.HOTKEY_VER, Description .. " keyboard", "keyboard", Keyboard) end
 
-	RegisterCommand("+" .. RunFunction .. "_kb" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, nil, false, OnlyRunIfClear) end, false)
-	RegisterCommand("-" .. RunFunction .. "_kb" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, nil, RunOnDepress, OnlyRunIfClear) end, false)
+	RegisterCommand("+" .. RunFunction .. "_kb" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, 3, false, OnlyRunIfClear) end, false)
+	RegisterCommand("-" .. RunFunction .. "_kb" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, 4, RunOnDepress, OnlyRunIfClear) end, false)
 	RegisterCommand("+" .. RunFunction .. "_cntrl_1" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, 1, false, OnlyRunIfClear) end, false)
 	RegisterCommand("-" .. RunFunction .. "_cntrl_1" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, 1, RunOnDepress, OnlyRunIfClear) end, false)
 	RegisterCommand("+" .. RunFunction .. "_cntrl_2" .. CONFIG.HOTKEY_VER, function() RunHotkey(RunFunction, 2, false, OnlyRunIfClear) end, false)
@@ -2577,8 +2582,10 @@ Citizen.CreateThread(function()
 				VehicleLimitDamage(PlayerVehicle.vehicle, 1)
 				
 				if CONFIG.VEHICLES.disable_radio > 0 or (CONFIG.VEHICLES.disable_radio == 0 and CONFIG.VEHICLES.radio_driver_only and PlayerVehicle.seat ~= -1) then
-					SetVehicleRadioEnabled(PlayerVehicle.vehicle, false)
-					SetUserRadioControlEnabled(false)
+					if IsVehicleRadioEnabled(PlayerVehicle.vehicle) then
+						SetVehicleRadioEnabled(PlayerVehicle.vehicle, false)
+						--SetUserRadioControlEnabled(false)
+					end
 				end
 				
 				AddToSet(ProcessedVehicles, PlayerVehicle.vehicle)
@@ -2586,7 +2593,7 @@ Citizen.CreateThread(function()
 				DisplaySpeedo()
 				
 				if CONFIG.VEHICLES.disable_radio > 0 or (CONFIG.VEHICLES.radio_driver_only and PlayerVehicle.seat ~= -1) then
-					if GetPlayerRadioStationName() ~= nil then
+					if IsVehicleRadioEnabled(PlayerVehicle.vehicle) or GetPlayerRadioStationName() ~= nil then
 						SetVehRadioStation(PlayerVehicle.vehicle, "OFF")
 					end
 				end
@@ -2732,12 +2739,6 @@ Citizen.CreateThread(function()
 						if CONFIG.NPC.stop_speaking > 0 then StopPedSpeaking(NpcPed, true) end
 						if CONFIG.NPC.stop_speaking == 2 then DisablePedPainAudio(NpcPed, true) end
 						
-						if IsVarSetTrue(NpcVehicle) then
-							if CONFIG.VEHICLES.disable_radio == 2 then
-								SetVehicleRadioEnabled(NpcVehicle, false)
-							end
-						end
-						
 						AddToSet(ProcessedPeds, NpcPed)
 					end
 					if RunPurgeProcessed then AddToSet(PurgeProcessedPeds, NpcPed) end
@@ -2765,6 +2766,10 @@ Citizen.CreateThread(function()
 						end
 						
 						if IsVarSetTrue(NpcVehicle) then
+							if CONFIG.VEHICLES.disable_radio == 2 then
+								if IsVehicleRadioEnabled(NpcVehicle) then SetVehicleRadioEnabled(NpcVehicle, false) end
+							end
+						
 							if CONFIG.NPC.prevent_evasive_driving then
 								if IsPedEvasiveDiving(NpcPed) or IsPedFleeing(NpcPed) then
 									d_print("Stopping evasive drive with NPC:  " .. NpcPed)
