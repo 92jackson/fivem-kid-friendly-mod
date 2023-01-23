@@ -22,6 +22,8 @@ local TimeExpiredClockRemaining = 60000
 local PlayerID = PlayerId()
 local PlayerPed = 0
 local CurrentCoords = nil
+local CurrentInterior = 0
+local CurrentInteriorBlocked = 0
 local PlayerVehicle = {is_entering = false, is_inside = false, vehicle = 0, seat = -2}
 local LastPlayerVehicle = {vehicle = 0, seat = -2}
 local IsEnteringVehicle = false
@@ -1493,15 +1495,17 @@ function ForceVehicleColour(Vehicle, Colour, IncludeSecondary)
 end
 
 function OverrideNetworkTime(Miliseconds, LockHour)
-	if LockHour ~= nil and LockHour >= -1 and CurrentLockHour ~= LockHour then
-		local LockMin = 0
-		if LockHour == -1 then
-			local year, month, day, hour, minute, second = GetLocalTime()
-			LockHour = hour
-			LockMin = minute
-		end
-		NetworkOverrideClockTime(LockHour, LockMin, 0)
-		CurrentLockHour = LockHour
+	if LockHour ~= nil
+		and (LockHour >= -1 and CurrentLockHour ~= LockHour)
+		or (CurrentLockHour ~= nil and LockHour > -1 and LockHour ~= GetClockHours()) then
+			local LockMin = 0
+			if LockHour == -1 then
+				local year, month, day, hour, minute, second = GetLocalTime()
+				LockHour = hour
+				LockMin = minute
+			end
+			NetworkOverrideClockTime(LockHour, LockMin, 0)
+			CurrentLockHour = LockHour
 	end
 		
 	if CurrentMilisecondsPerMin ~= Miliseconds then
@@ -2581,12 +2585,12 @@ Citizen.CreateThread(function()
 			elseif PlayerVehicle.is_inside and not DoesSetContain(ProcessedVehicles, PlayerVehicle.vehicle) then
 				VehicleLimitDamage(PlayerVehicle.vehicle, 1)
 				
-				if CONFIG.VEHICLES.disable_radio > 0 or (CONFIG.VEHICLES.disable_radio == 0 and CONFIG.VEHICLES.radio_driver_only and PlayerVehicle.seat ~= -1) then
+				--[[if CONFIG.VEHICLES.disable_radio > 0 or (CONFIG.VEHICLES.disable_radio == 0 and CONFIG.VEHICLES.radio_driver_only and PlayerVehicle.seat ~= -1) then
 					if IsVehicleRadioEnabled(PlayerVehicle.vehicle) then
 						SetVehicleRadioEnabled(PlayerVehicle.vehicle, false)
 						--SetUserRadioControlEnabled(false)
 					end
-				end
+				end]]--
 				
 				AddToSet(ProcessedVehicles, PlayerVehicle.vehicle)
 			elseif PlayerVehicle.is_inside then
@@ -2594,6 +2598,7 @@ Citizen.CreateThread(function()
 				
 				if CONFIG.VEHICLES.disable_radio > 0 or (CONFIG.VEHICLES.radio_driver_only and PlayerVehicle.seat ~= -1) then
 					if IsVehicleRadioEnabled(PlayerVehicle.vehicle) or GetPlayerRadioStationName() ~= nil then
+						SetVehicleRadioEnabled(PlayerVehicle.vehicle, false)
 						SetVehRadioStation(PlayerVehicle.vehicle, "OFF")
 					end
 				end
@@ -2681,7 +2686,6 @@ Citizen.CreateThread(function()
 						
 						
 						if IsPlayerAGhost(ActivePlayer) then
-							--SetPlayerInvisibleLocally(GetPlayerFromServerId(ActivePlayer), true)
 							SetEntityLocallyInvisible(ActivePlayerPed)
 							if IsVarSetTrue(ActivePlayerVehicle.vehicle) and ActivePlayerVehicle.vehicle ~= PlayerVehicle.vehicle then
 								SetEntityLocallyInvisible(ActivePlayerVehicle.vehicle)
@@ -2705,10 +2709,7 @@ Citizen.CreateThread(function()
 					
 						if CONFIG.NPC.non_combat then
 							SetPedCombatAttributes(NpcPed, 17, true) -- Peds just flee when they face enemies with weapons
-							SetPedConfigFlag(NpcPed, 128, false) -- CPED_CONFIG_FLAG_CanBeAgitated
-							SetPedConfigFlag(NpcPed, 183, false) -- CPED_CONFIG_FLAG_IsAgitated
 							SetPedCombatAttributes(NpcPed, 2, false) -- BF_CanDoDrivebys
-							SetPedCombatAttributes(NpcPed, 20, false) -- BF_CanTauntInVehicle
 							SetPedConfigFlag(NpcPed, 422, true) -- CPED_CONFIG_FLAG_DisableVehicleCombat
 							SetDriverAggressiveness(NpcPed, 0.0)
 						end
@@ -2719,13 +2720,18 @@ Citizen.CreateThread(function()
 							SetPedCanCowerInCover(NpcPed, false)
 							SetPedHearingRange(NpcPed, 0.0)
 							SetBlockingOfNonTemporaryEvents(NpcPed, true)
+							SetPedCombatAttributes(NpcPed, 20, false) -- BF_CanTauntInVehicle
 							SetPedConfigFlag(NpcPed, 17, true) -- CPED_CONFIG_FLAG_BlockNonTemporaryEvents
 							SetPedConfigFlag(NpcPed, 24, true) -- CPED_CONFIG_FLAG_IgnoreSeenMelee
+							SetPedConfigFlag(NpcPed, 128, false) -- CPED_CONFIG_FLAG_CanBeAgitated
+							SetPedConfigFlag(NpcPed, 183, false) -- CPED_CONFIG_FLAG_IsAgitated
 							SetPedConfigFlag(NpcPed, 208, true) -- CPED_CONFIG_FLAG_DisableExplosionReactions
 							SetPedConfigFlag(NpcPed, 209, false) -- CPED_CONFIG_FLAG_DodgedPlayer
 							SetPedConfigFlag(NpcPed, 225, true) -- CPED_CONFIG_FLAG_DisablePotentialToBeWalkedIntoResponse
 							SetPedConfigFlag(NpcPed, 226, true) -- CPED_CONFIG_FLAG_DisablePedAvoidance
 							SetPedConfigFlag(NpcPed, 294, true) -- CPED_CONFIG_FLAG_DisableShockingEvents
+							
+							if IsVarSetTrue(NpcVehicle) then SetHornEnabled(NpcVehicle, false) end -- Working??
 						end
 						
 						if CONFIG.NPC.prevent_evasive_driving then
@@ -2826,39 +2832,42 @@ Citizen.CreateThread(function()
 					end
 				end]]--
 				
-				--d_print(GetInteriorAtCoords(CurrentCoords.x, CurrentCoords.y, CurrentCoords.z))
 				
-				if CONFIG.WORLD.lock_adult_doors and next(CONFIG.WORLD.interiors_doors_to_restrict) ~= nil then
-					for _, Type in pairs(CONFIG.WORLD.interiors_doors_to_restrict) do
-						if DoesSetContain(CONSTANT.RESTRICTED_AREAS, Type) then
-							for Interior, Doors in pairs(CONSTANT.RESTRICTED_AREAS[Type]) do
-								local DoorPairCheck = 0.0
-								
-								for _, Door in pairs(CONSTANT.RESTRICTED_AREAS[Type][Interior]) do
-									local BlockDoor = false
-									if Door.coords.z ~= DoorPairCheck then
-										if Vdist2(CurrentCoords.x, CurrentCoords.y, CurrentCoords.z, Door.coords.x, Door.coords.y, Door.coords.z) < 30.0 then
-											DoorPairCheck = Door.coords.z
-											BlockDoor = true
-											
-											if RunEveryX(5, false, "doorlocked", true) then ShowNotification("~r~Sorry, closed for business.", true, "lockeddoor") end
+				local CurrentInteriorNow = GetInteriorAtCoords(CurrentCoords.x, CurrentCoords.y, CurrentCoords.z)
+				if CONFIG.WORLD.lock_adult_doors
+					and next(CONFIG.WORLD.interiors_doors_to_restrict) ~= nil
+					and CurrentInteriorNow > 0
+					and CurrentInteriorNow ~= CurrentInteriorBlocked then
+						for _, Type in pairs(CONFIG.WORLD.interiors_doors_to_restrict) do
+							if DoesSetContain(CONSTANT.RESTRICTED_AREAS, Type) then
+								for Interior, Doors in pairs(CONSTANT.RESTRICTED_AREAS[Type]) do
+									if CurrentInteriorNow == Interior then
+										if CurrentInteriorNow ~= CurrentInterior then
+											d_print("At blocked interior:  " .. Interior .. ", blocking doors")
+											ShowNotification("~r~Sorry, closed for business.", true, "lockeddoor")
 										end
-									else
-										BlockDoor = true
-									end
-									
-									if BlockDoor then
-										local DoorObject = GetClosestObjectOfType(Door.coords.x, Door.coords.y, Door.coords.z, 5.0, Door.door_hash, false, false, false)
-										if DoesEntityExist(DoorObject) and RunEveryX(10, false, "doorlocked" .. DoorObject, true) then
-											FreezeEntityPosition(DoorObject, true)
-											d_print("Blocking access to door:  " .. Door.door_hash .. " at interior:  " .. Interior)
+										CurrentInteriorBlocked = CurrentInteriorNow
+										
+										for _, Door in pairs(Doors) do
+											local DoorObject = GetClosestObjectOfType(Door.coords.x, Door.coords.y, Door.coords.z, 5.0, Door.door_hash, false, false, false)
+											
+											if DoesEntityExist(DoorObject) then
+												--if not IsEntityPositionFrozen(DoorObject) then
+													FreezeEntityPosition(DoorObject, true)
+													d_print("Blocking access to door:  " .. Door.door_hash .. " at interior:  " .. Interior)
+												--end
+											else
+												CurrentInteriorBlocked = 0
+											end
 										end
 									end
 								end
 							end
 						end
-					end
+				elseif CurrentInteriorNow ~= CurrentInteriorBlocked then
+					CurrentInteriorBlocked = 0
 				end
+				CurrentInterior = CurrentInteriorNow
 				
 				if RunPurgeProcessed then
 					ProcessedPeds = PurgeProcessedPeds
