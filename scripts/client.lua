@@ -9,6 +9,7 @@
 ---------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------
 local PlayerSpawnReady = false
+local GameLoaded = true
 local ClientClock = 0
 local RunEveryXLastCalled = {}
 local TimeRemaining = -1
@@ -739,7 +740,7 @@ function GetTailPlayerCoords(Ped, ForceOutdoor, TailingEntity, TailingHash, Spaw
 	
 	local Offset = GetOffsetFromEntityInWorldCoords(Entity, 0.0, yVal, 2)
 	
-	if ForceOutdoor then
+	if ForceOutdoor and not SpawnInfront then
 		local EntityCoords = GetEntityCoords(Entity)
 		if (IsPointOnRoad(EntityCoords.x, EntityCoords.y, EntityCoords.z, Entity) and not IsPointOnRoad(Offset.x, Offset.y, Offset.z, Entity))
 			or not IsCollisionMarkedOutside(Offset.x, Offset.y, Offset.z) then
@@ -989,10 +990,12 @@ function CloneVehicle(ForceModelByName, ForceFacing)
 	if IsVarSetTrue(ForceModelByName) or IsPedInAnyVehicle(PlayerPed, false) then
 		local ModelHash = nil
 		local ModelName = nil
+		local CloneEntity = 0
 		if IsVarSetTrue(ForceModelByName) then
 			ModelHash = GetHashKey(ForceModelByName)
 			ModelName = SPAWN_ITEMS.VEHICLES[ForceModelByName]
 		else
+			CloneEntity = NetworkGetNetworkIdFromEntity(PlayerVehicle.vehicle)
 			ModelHash = GetEntityModel(PlayerVehicle.vehicle)
 			ModelName = GetLabelText(GetDisplayNameFromVehicleModel(ModelHash))
 		end
@@ -1008,7 +1011,7 @@ function CloneVehicle(ForceModelByName, ForceFacing)
 		local Coords, Heading = GetTailPlayerCoords(PlayerPed, true, nil, ModelHash, Facing)
 		
 		TriggerServerEvent("SpawnVehicle", {
-			clone_entity = NetworkGetNetworkIdFromEntity(PlayerVehicle.vehicle),
+			clone_entity = CloneEntity,
 			force_model = ForceModelByName,
 			model_name = ModelName,
 			coords = Coords,
@@ -1496,8 +1499,8 @@ end
 
 function OverrideNetworkTime(Miliseconds, LockHour)
 	if LockHour ~= nil
-		and (LockHour >= -1 and CurrentLockHour ~= LockHour)
-		or (CurrentLockHour ~= nil and LockHour > -1 and LockHour ~= GetClockHours()) then
+		and ((LockHour >= -1 and CurrentLockHour ~= LockHour)
+		or (CurrentLockHour ~= nil and LockHour > -1 and LockHour ~= GetClockHours())) then
 			local LockMin = 0
 			if LockHour == -1 then
 				local year, month, day, hour, minute, second = GetLocalTime()
@@ -2529,7 +2532,7 @@ Citizen.CreateThread(function()
 	
 	while true do
 		Citizen.Wait(0) -- Prevent crashing, repeat every tick
-		if PlayerSpawnReady then
+		if GameLoaded or PlayerSpawnReady then
 			FullscreenBlackout = false
 			DisplayGamePlayTimer()
 			DisplayOnlineCount()
@@ -2882,7 +2885,7 @@ end)
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(1000) -- Repeat every second
-		if PlayerSpawnReady then
+		if GameLoaded or PlayerSpawnReady then
 			ClientClock = ClientClock +1 -- Count every second
 			
 			if CONFIG.TRAINER.allow_parental_controls and TimeRemaining > -1 then
@@ -2914,8 +2917,8 @@ Citizen.CreateThread(function()
 			end
 			
 			if CONFIG.WORLD.lock_time_to_hour == -3 then
-				if GetClockHours() > 19 or GetClockHours() < 5 then
-					OverrideNetworkTime(500)
+				if GetClockHours() > 18 or GetClockHours() < 5 then
+					OverrideNetworkTime(50)
 				else
 					OverrideNetworkTime(1000)
 				end
@@ -2981,10 +2984,14 @@ end)
 ------------------------------
 RegisterNetEvent('playerSpawned')
 AddEventHandler('playerSpawned', function()
+	GameLoaded = false
+	
 	if CONFIG.PLAYERS.random_spawn_ped and next(SPAWN_ITEMS.PEDS) ~= nil then
 		local Model, Name = GetFromSetAtPosX(SPAWN_ITEMS.PEDS, math.random(TableLength(SPAWN_ITEMS.PEDS)))
 		d_print("Setting the player ped model to:  " .. Model)
 		RequestNewPedModel(Model, Name)
+		
+		Citizen.Wait(1000)
 	end
 	
 	if CONFIG.WORLD.lock_weather ~= "" and CONFIG.WORLD.lock_weather ~= "DEFAULT" then	
@@ -2997,6 +3004,7 @@ AddEventHandler('playerSpawned', function()
 		PlayerSpawnReady = true
 	end
 	
+	GameLoaded = true
 	--[[if not PlayerSpawnReady and CONFIG.LOADING_SCREEN.loading_screen_enabled then
 		local serializedTable = serpent.dump(SetCommands)
 		SendLoadingScreenMessage(serializedTable)
