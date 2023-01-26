@@ -241,18 +241,18 @@ AddEventHandler('SpawnVehicle', function(Data)
 			DeleteEntity(SpawnedVehicles[Player].quick_spawn)
 		else table.insert(SpawnedVehicles[Player].anti_flood, SpawnedVehicles[Player].quick_spawn) end
 	end
-	if #SpawnedVehicles[Player].anti_flood > CONFIG.VEHICLES.max_spawned_per_player then
+	if #SpawnedVehicles[Player].anti_flood >= CONFIG.VEHICLES.max_spawned_per_player then
 		local PurgeCount = #SpawnedVehicles[Player].anti_flood - CONFIG.VEHICLES.max_spawned_per_player
 		
 		for i=1, #SpawnedVehicles[Player].anti_flood do
-			if i > PurgeCount then break end
-			
 			if DoesEntityExist(SpawnedVehicles[Player].anti_flood[1])
 				and not IsAnyPlayerInVehicle(SpawnedVehicles[Player].anti_flood[1]) then
 					DeleteEntity(SpawnedVehicles[Player].anti_flood[1])
 					d_print("Vehicle anti-flood, deleting vehicle:  " .. SpawnedVehicles[Player].anti_flood[1], 2)
 			end
 			table.remove(SpawnedVehicles[Player].anti_flood, 1)
+			
+			if i >= PurgeCount then break end
 		end
 	end
 	
