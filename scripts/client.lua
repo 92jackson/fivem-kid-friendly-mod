@@ -9,7 +9,6 @@
 ---------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------
 local PlayerSpawnReady = false
-local GameLoaded = true
 local ClientClock = 0
 local RunEveryXLastCalled = {}
 local TimeRemaining = -1
@@ -1603,7 +1602,7 @@ end)
 
 RegisterNetEvent("UpdatedPlayerData")
 AddEventHandler("UpdatedPlayerData", function(Data)
-	if GetPlayerServerId(PlayerID) ~= Data.player and Data.data ~= nil then
+	if tostring(GetPlayerServerId(PlayerID)) ~= Data.player and Data.data ~= nil then
 		if ExpectingPlayerUpdatePush == Data.player then
 			PlayerUpdatePushRecieved = true
 			ExpectingPlayerUpdatePush = -1
@@ -2529,10 +2528,11 @@ Citizen.CreateThread(function()
 		end
 	end]]--
 	
+	if not GetIsLoadingScreenActive() then PlayerSpawnReady = true end
 	
 	while true do
 		Citizen.Wait(0) -- Prevent crashing, repeat every tick
-		if GameLoaded or PlayerSpawnReady then
+		if PlayerSpawnReady then
 			FullscreenBlackout = false
 			DisplayGamePlayTimer()
 			DisplayOnlineCount()
@@ -2885,7 +2885,7 @@ end)
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(1000) -- Repeat every second
-		if GameLoaded or PlayerSpawnReady then
+		if PlayerSpawnReady then
 			ClientClock = ClientClock +1 -- Count every second
 			
 			if CONFIG.TRAINER.allow_parental_controls and TimeRemaining > -1 then
@@ -2984,14 +2984,12 @@ end)
 ------------------------------
 RegisterNetEvent('playerSpawned')
 AddEventHandler('playerSpawned', function()
-	GameLoaded = false
-	
 	if CONFIG.PLAYERS.random_spawn_ped and next(SPAWN_ITEMS.PEDS) ~= nil then
 		local Model, Name = GetFromSetAtPosX(SPAWN_ITEMS.PEDS, math.random(TableLength(SPAWN_ITEMS.PEDS)))
 		d_print("Setting the player ped model to:  " .. Model)
 		RequestNewPedModel(Model, Name)
 		
-		Citizen.Wait(1000)
+		if not PlayerSpawnReady then Citizen.Wait(1000) end
 	end
 	
 	if CONFIG.WORLD.lock_weather ~= "" and CONFIG.WORLD.lock_weather ~= "DEFAULT" then	
@@ -3004,7 +3002,6 @@ AddEventHandler('playerSpawned', function()
 		PlayerSpawnReady = true
 	end
 	
-	GameLoaded = true
 	--[[if not PlayerSpawnReady and CONFIG.LOADING_SCREEN.loading_screen_enabled then
 		local serializedTable = serpent.dump(SetCommands)
 		SendLoadingScreenMessage(serializedTable)
