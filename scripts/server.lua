@@ -25,7 +25,7 @@ function RunEveryX(S)
 end
 
 AddEventHandler('playerConnecting', function(_, _, deferrals)
-	local source = source
+	local source = tostring(source)
 	
 	if CONFIG.LOADING_SCREEN.loading_screen_enabled then
 		deferrals.handover({
@@ -53,10 +53,10 @@ AddEventHandler('playerDropped', function (reason)
 		RefreshPauseState()
 	end
 	
-	if DoesSetContain(PlayersGhosting, source) then RemoveFromSet(PlayersGhosting, source) end
-	if DoesSetContain(LastActivePlayersUpdate, source) then RemoveFromSet(LastActivePlayersUpdate, source) end
+	if DoesSetContain(PlayersGhosting, source, true) then RemoveFromSet(PlayersGhosting, source, true) end
+	if DoesSetContain(LastActivePlayersUpdate, source, true) then RemoveFromSet(LastActivePlayersUpdate, source, true) end
 	
-	TriggerClientEvent("ActivePlayerDropped", -1, source)
+	TriggerClientEvent("ActivePlayerDropped", -1, tostring(source))
 end)
 
 RegisterNetEvent("ResourceStopped")
@@ -221,7 +221,7 @@ RegisterNetEvent("SpawnVehicle")
 AddEventHandler('SpawnVehicle', function(Data)
 	local ModelHash = nil
 	local IsClone = false
-	local Player = source
+	local Player = tostring(source)
 	
 	if IsVarSetTrue(Data.force_model) then
 		ModelHash = GetHashKey(Data.force_model)
@@ -254,11 +254,13 @@ AddEventHandler('SpawnVehicle', function(Data)
 			
 			if i >= PurgeCount then break end
 		end
+		
+		Citizen.Wait(200)
 	end
 	
 	local SpawnVeh = CreateVehicle(ModelHash, Data.coords.x, Data.coords.y, Data.coords.z, Data.heading, true, false)
-	if Data.teleport_inside then TaskWarpPedIntoVehicle(source, SpawnVeh, -1) end
-	d_print("Vehicle spawned as per request of player:  " .. source .. ", hash:  " .. ModelHash, 2)
+	if Data.teleport_inside then TaskWarpPedIntoVehicle(Player, SpawnVeh, -1) end
+	d_print("Vehicle spawned as per request of player:  " .. Player .. ", hash:  " .. ModelHash, 2)
 	
 	while not DoesEntityExist(SpawnVeh) do
 		Citizen.Wait(100)
@@ -279,8 +281,7 @@ AddEventHandler('PlayerToggleGhost', function(Ghost)
 	if Ghost and not DoesSetContain(PlayersGhosting, source, true) then AddToSet(PlayersGhosting, source, nil, true)
 	elseif not Ghost and DoesSetContain(PlayersGhosting, source, true) then RemoveFromSet(PlayersGhosting, source, true) end
 	
-	--TriggerClientEvent("ActivePlayerGhostStatusChange", -1, {player = source, is_ghost = Ghost})
-	TriggerClientEvent("UpdatedPlayerData", -1, {player = source, data = GetNetPlayerData(source)})
+	TriggerClientEvent("UpdatedPlayerData", -1, {player = tostring(source), data = GetNetPlayerData(source)})
 end)
 
 RegisterNetEvent("GetUpdatedPlayerData")
@@ -290,7 +291,7 @@ end)
 
 RegisterNetEvent("ReportLocationUpdated")
 AddEventHandler('ReportLocationUpdated', function()
-	TriggerClientEvent("UpdatedPlayerData", -1, {player = source, data = GetNetPlayerData(source)})
+	TriggerClientEvent("UpdatedPlayerData", -1, {player = tostring(source), data = GetNetPlayerData(source)})
 end)
 
 function GetNetPlayerData(NetPlayer)
