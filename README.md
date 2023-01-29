@@ -61,6 +61,10 @@ For updates, support and suggestions, join the [Discord](https://discord.gg/e3eX
   start FiveM-Kid-Friendly
 ```
 
+* **The mod requires a game build version of 2189 or higher (this is NOT  the same as your FX Server version), if you haven't already, also set the following in your server.cfg:**
+```
+set sv_enforceGameBuild 2189
+```
 
 ## FAQ
 
