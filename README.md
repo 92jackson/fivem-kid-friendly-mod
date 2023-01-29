@@ -70,7 +70,7 @@ set sv_enforceGameBuild 2189
 
 #### **Q1:** Can I run this mod locally without running a server?
 
-**A1:** While it is possible to run scripts locally without a server environment, it's not recommended. Check out the following guides to get a local server set up on your PC (accessible by computers on your local network):
+**A1:** While it is possible to run scripts in FiveM without a server environment, it's not recommended. Check out the following guides to get a local server set up on your PC (accessible by computers on your local network):
 
 * Local server with split-screen/dual screen support:
     - [YouTube - video guide](https://youtu.be/BvIIO0J50Zk)
@@ -81,4 +81,4 @@ set sv_enforceGameBuild 2189
 
 **A2:** Yes, ~~it will work. But be warned, this script was intended for local host use and therefore does not employ any anti-cheat/hack preventions, given that this script is intended to provide a safe gaming experience for children, I highly recommend that you look into adding safety nets via a third party script(s).~~
 
-As of version 0.2.1, there are anti-cheat/hack preventions, see ```NETWORK_PROTECTION``` in the ```config.lua``` to prevent players spawning in inappropriate vehicles/peds/objects.
+As of version 0.2.1, there are anti-cheat/hack preventions, see ```NETWORK_PROTECTION``` in the ```config.lua``` to prevent players spawning in inappropriate vehicles/peds/objects, and to ensure they're not tampering with the client script.
