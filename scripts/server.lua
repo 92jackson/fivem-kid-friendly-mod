@@ -25,7 +25,7 @@ function RunEveryX(S)
 end
 
 AddEventHandler('playerConnecting', function(_, _, deferrals)
-	local source = tostring(source)
+	local source = source
 	
 	if CONFIG.LOADING_SCREEN.loading_screen_enabled then
 		deferrals.handover({
@@ -194,15 +194,22 @@ function SetPlayerPed(Player, Data)
 	local Error, Type = not IsPedModelLegal(Data.model_hash)
 	
 	if not Error then
+		local PlayerPed = GetPlayerPed(Player)
+		local OldModel = GetEntityModel(PlayerPed)
 		SetPlayerModel(Player, Data.model_hash)
 		
-		local NewPlayerPed = GetPlayerPed(Player)
+		local NewModel = GetEntityModel(PlayerPed)
+		while NewModel == OldModel do
+			NewModel = GetEntityModel(PlayerPed)
+			Citizen.Wait(100)
+		end
+		
 		if LastActivePlayersUpdate[Player] ~= nil then
-			LastActivePlayersUpdate[Player].ped = NetworkGetNetworkIdFromEntity(NewPlayerPed)
+			LastActivePlayersUpdate[Player].ped_model = GetEntityModel(PlayerPed)
 		end
 		
 		if IsVarSetTrue(Data.vehicle) then
-			TaskWarpPedIntoVehicle(NewPlayerPed, Data.vehicle, Data.seat)
+			TaskWarpPedIntoVehicle(PlayerPed, Data.vehicle, Data.seat)
 		end
 		
 		TriggerClientEvent("SpawnServerDecision", Player, {type = 0, error = false, decision = "Player model changed to:  ~g~" .. Data.model_name})
@@ -221,7 +228,7 @@ RegisterNetEvent("SpawnVehicle")
 AddEventHandler('SpawnVehicle', function(Data)
 	local ModelHash = nil
 	local IsClone = false
-	local Player = tostring(source)
+	local Player = source
 	
 	if IsVarSetTrue(Data.force_model) then
 		ModelHash = GetHashKey(Data.force_model)
