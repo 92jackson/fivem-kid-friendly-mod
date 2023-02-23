@@ -225,7 +225,7 @@ CONFIG = {
 	
 --	Time, weather, blood pooling, ambient sounds and door locks
 	WORLD = {
-		lock_time_to_hour = -3, -- -4 = Off/default, -3 = Faster days, really fast nights, -2 = Faster days and nights,  -1 = Match the player's time of day, 0 - 23 = Locked to set hour of day
+		lock_time_to_hour = -4, -- -4 = Off/default, -3 = Faster days, really fast nights (BUGGED!!! v0.2.2), -2 = Faster days and nights,  -1 = Match the player's time of day, 0 - 23 = Locked to set hour of day
 		lock_weather = "", -- BLIZZARD, CLEAR, CLEARING, CLOUDS, EXTRASUNNY, FOGGY, HALLOWEEN, NEUTRAL, OVERCAST, RAIN, SMOG, SNOW, SNOWLIGHT, THUNDER, XMAS
 		disable_ambient_speech = true, -- Disables non-ped speech (such as phone call audio) and other ambient world audio
 		prevent_blood_pools = true, -- Blood pools are inevitable if ragdolling is enabled, this tries to remove them as they appear
