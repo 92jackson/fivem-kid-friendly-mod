@@ -40,12 +40,6 @@ Extra features:
 
 
 ## Support
-### Donate
-
-Many hours have been spent scripting and testing this mod, if you would like to support this and future work, you can use the secure PayPal link below (:
-
-[![paypal](https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=9QZ34DQCEPAGG)
-
 ### Discord
 
 For updates, support and suggestions, join the [Discord](https://discord.gg/e3eXGTJbjx).
