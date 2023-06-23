@@ -20,6 +20,7 @@ Main features:
 * Ability to block NPC from carjacking
 * All inappropriate ped models can be removed
 * All NPC speech can be muted
+* Replace all NPC models
 
 Extra features:
 
