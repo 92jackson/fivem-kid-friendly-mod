@@ -137,21 +137,6 @@ AddEventHandler('ForcePausePlayers', function(Pause)
 	end
 end)
 
--- TESTING - idea: use to recplace illegal npc ped models
---[[AddEventHandler('populationPedCreating', function(x, y, z, model, setters)
-	RequestModel("ig_bankman")
-	while not HasModelLoaded(ModelHash) do
-		Citizen.Wait(0)
-	end
-	
-	Citizen.Trace(("Swapping a ped at %s %s %s (was %s)\n"):format(tostring(x), tostring(y), tostring(z), tostring(model)))
-
-	setters.setModel("ig_bankman")
-	setters.setPosition(x, y, z)
-	
-	CancelEvent() -- to test
-end)]]--
-
 function IsPedModelLegal(ModelHash, IgnoreTrustedCheck)
 	if CONFIG.NETWORK_PROTECTION.disable_known_inappropriate_ped_models then
 		if DoesSetContain(CONSTANT.RESTRICTED_PEDS, ModelHash) then return false, 1 end
@@ -420,7 +405,7 @@ Citizen.CreateThread(function()
 				LastActivePlayersUpdate = ActivePlayers
 				
 				if next(ActivePlayers) ~= nil then
-					d_print("Active player data compiled, data:  " .. dump(ActivePlayers), 3)
+					d_print("Active player data compiled, data:  " .. dump(ActivePlayers), 2)
 					
 					if #NetPlayers > 1 then
 						Citizen.CreateThread(function()
