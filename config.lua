@@ -138,7 +138,8 @@ CONFIG = {
 			-- The following flags prevent ragdoll by forcing the ped as invincible during the events
 			_prevent_in_vehicle = true,
 			_prevent_when_falling = true
-		}
+		},
+		replace_peds = 1 -- 0 = Off, 1 = Replace all NPC, 2 = Replace disturbing and minimal clothing NPCs only. Replace NPC models with random models from the SPAWN_ITEMS.PEDS list
 	},
 	
 --	Police NPCs
