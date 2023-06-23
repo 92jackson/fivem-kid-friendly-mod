@@ -61,6 +61,7 @@ local ProcessedPeds = {}
 local ProcessedVehicles = {}
 local RunPurgeProcessed = false
 local PlayerPassengerInVehicle = 0
+local TrustedPedModels = {}
 
 --------------------------------
 --------------------------------
@@ -135,7 +136,7 @@ function MaintainPedHealth(Ped, InvincibleFlag, RagdollFlag, InVehicle)
 	if InvincibleFlag and not RagdollFlag.disable_all then
 		if IsPedFalling(Ped) and RagdollFlag._prevent_when_falling then
 			local DistanceToGround = GetEntityHeightAboveGround(Ped)
-			if DistanceToGround <= 8.0 and DistanceToGround > 2.0 then
+			if DistanceToGround <= 8.0 and DistanceToGround > 1.0 then
 				if RunEveryX(1, false, "fallragdollprevent" .. Ped, true) then
 					ClearPedTasksImmediately(Ped)
 					d_print("Ped falling, preventing impact for ped:  " .. Ped)
@@ -143,10 +144,10 @@ function MaintainPedHealth(Ped, InvincibleFlag, RagdollFlag, InVehicle)
 			end
 		end
 		
-		if Ped == PlayerPed and VehicleJustExitedWhileMoving then
-			ClearPedTasksImmediately(Ped)
-			d_print("Vehicle exited while moving! Clearing your ped tasks immediately to prevent ragdoll animation.")
-			VehicleJustExitedWhileMoving = false
+		if RagdollFlag._prevent_when_leaving_moving_vehicle
+			and IsPedJumpingOutOfVehicle(Ped) then
+				ClearPedTasksImmediately(Ped)
+				d_print("Vehicle exited while moving! Clearing ped tasks immediately to prevent ragdoll animation for ped:   " .. Ped)
 		end
 		
 		if IsVarSetTrue(InVehicle) and RagdollFlag._prevent_in_vehicle then SetEntityInvincible(Ped, true)
@@ -178,7 +179,8 @@ function KeepPedClean(Ped, KeepClean)
 	end
 	
 	if CONFIG.WORLD.prevent_blood_pools then
-		if IsPedRagdoll(Ped) or IsPedDeadOrDying(Ped, true) or IsPedProne(Ped) then
+		if IsPedRagdoll(Ped) or IsPedDeadOrDying(Ped, true) or IsPedInWrithe(Ped) then
+			SetDisableDecalRenderingThisFrame()
 			local Coords = GetEntityCoords(Ped, false)
 			RemoveDecalsInRange(Coords.x, Coords.y, Coords.z, 5.0)
 		end
@@ -685,6 +687,23 @@ function RequestNewPedModel(Model, Name)
 	})
 end
 
+AddEventHandler('populationPedCreating', function(x, y, z, model, setters)
+	if ((CONFIG.NPC.replace_peds == 1 and not DoesSetContain(TrustedPedModels, model))
+		or (CONFIG.NPC.replace_peds == 2 and DoesSetContain(CONSTANT.RESTRICTED_PEDS, model)))
+		and next(SPAWN_ITEMS.PEDS) ~= nil then
+		local NewModel, Name = GetFromSetAtPosX(SPAWN_ITEMS.PEDS, math.random(TableLength(SPAWN_ITEMS.PEDS)))
+		
+		RequestModel(NewModel)
+		while not HasModelLoaded(model) do
+			Citizen.Wait(0)
+		end
+		
+		d_print("Swapping ped model " .. tostring(model) .. " with model: " .. Name .. ", location: " .. tostring(x) .. ", " .. tostring(y) .. ", " .. tostring(z), 1)
+
+		setters.setModel(NewModel)
+	end
+end)
+
 RegisterNetEvent("SpawnServerDecision")
 AddEventHandler("SpawnServerDecision", function(Data)
 	d_print("The server has sent a decision based on your spawn request:  " .. dump(Data))
@@ -1063,13 +1082,6 @@ function GetVehiclePedIsInOrEntering(Ped)
 		if PlayerVehicle.is_inside and IsVarSetTrue(PlayerVehicle.vehicle) and PlayerVehicle.vehicle ~= PedVehicle.vehicle then
 			LastPlayerVehicle.vehicle = PlayerVehicle.vehicle
 			LastPlayerVehicle.seat = PlayerVehicle.seat
-			
-			if not CONFIG.PLAYERS.prevent_ragdoll_flags.disable_all
-				and CONFIG.PLAYERS.prevent_ragdoll_flags._prevent_when_leaving_moving_vehicle
-				and GetEntitySpeed(LastPlayerVehicle.vehicle) > 5.0
-				and not PedVehicle.is_inside then
-					VehicleJustExitedWhileMoving = true
-			end
 			
 			if VehicleIsInvisible then
 				NetworkSetEntityInvisibleToNetwork(LastPlayerVehicle.vehicle, false)
@@ -2530,6 +2542,13 @@ Citizen.CreateThread(function()
 	
 	if not GetIsLoadingScreenActive() then PlayerSpawnReady = true end
 	
+	if CONFIG.NPC.replace_peds > 0 and next(SPAWN_ITEMS.PEDS) ~= nil then
+		for model,name in pairs(SPAWN_ITEMS.PEDS) do
+			AddToSet(TrustedPedModels, GetHashKey(model))
+			d_print("Ped added to trusted peds:  " .. model, 1)
+		end
+	end
+	
 	while true do
 		Citizen.Wait(0) -- Prevent crashing, repeat every tick
 		if PlayerSpawnReady then
@@ -2711,6 +2730,7 @@ Citizen.CreateThread(function()
 						SetPedCanBeDraggedOut(NpcPed, not CONFIG.NPC.cant_carjack)
 					
 						if CONFIG.NPC.non_combat then
+							SetPedCombatAbility(NpcPed, 0)
 							SetPedCombatAttributes(NpcPed, 17, true) -- Peds just flee when they face enemies with weapons
 							SetPedCombatAttributes(NpcPed, 2, false) -- BF_CanDoDrivebys
 							SetPedConfigFlag(NpcPed, 422, true) -- CPED_CONFIG_FLAG_DisableVehicleCombat
@@ -2721,6 +2741,7 @@ Citizen.CreateThread(function()
 							if IsVarSetTrue(GetPedAlertness(NpcPed)) then SetPedAlertness(NpcPed,0) end
 							SetPedFleeAttributes(NpcPed, 0, false)
 							SetPedCanCowerInCover(NpcPed, false)
+							SetPedSeeingRange(NpcPed, 0.0)
 							SetPedHearingRange(NpcPed, 0.0)
 							SetBlockingOfNonTemporaryEvents(NpcPed, true)
 							SetPedCombatAttributes(NpcPed, 20, false) -- BF_CanTauntInVehicle
@@ -2772,6 +2793,11 @@ Citizen.CreateThread(function()
 								TaskSetBlockingOfNonTemporaryEvents(NpcPed, true)
 								TaskWanderStandard(NpcPed, 10.0, 10)
 							end
+						end
+						
+						if CONFIG.NPC.non_combat and IsPedInCombat(NpcPed) then
+							ClearPedTasksImmediately(NpcPed)
+							TaskWanderStandard(NpcPed, 10.0, 10)
 						end
 						
 						if IsVarSetTrue(NpcVehicle) then
