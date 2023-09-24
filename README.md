@@ -41,8 +41,10 @@ Extra features:
 
 
 ## Support
-### Discord
 
+**There is no guarantee of this mod working alongside other mods- game mechanics are heavily modified by FKFM which will likely cause conflicts with other mods (especially mods which have opposing objectives- namely, FivePD). If you have issues with this script, ALWAYS start troubleshooting by temporarily removing all other scripts, checking that FKFM runs as intended on its own, before adding other scripts back one-by-one.**
+
+### Discord
 For updates, support and suggestions, join the [Discord](https://discord.gg/e3eXGTJbjx).
 
 
