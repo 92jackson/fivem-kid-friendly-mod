@@ -72,7 +72,7 @@ set sv_enforceGameBuild 2189
 * Local server with split-screen/dual screen support:
     - [YouTube - video guide](https://youtu.be/BvIIO0J50Zk)
     - [Reddit - written guide](https://www.reddit.com/r/nucleuscoop/comments/t18dfa/comment/hyee5nd/?utm_source=share&utm_medium=web2x&context=3)
-    ## 2024 handller: https://www.reddit.com/r/nucleuscoop/comments/t18dfa/comment/l7sr244/
+    - **2024 handller FIX: https://www.reddit.com/r/nucleuscoop/comments/t18dfa/comment/l7sr244/**
 * Local server only: [YouTube - video guide](https://youtu.be/YmW9K6GjY9w)
 
 #### **Q2:** I run a FiveM server, can I use this script online?
