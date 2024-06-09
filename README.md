@@ -74,9 +74,3 @@ set sv_enforceGameBuild 2189
     - [Reddit - written guide](https://www.reddit.com/r/nucleuscoop/comments/t18dfa/comment/hyee5nd/?utm_source=share&utm_medium=web2x&context=3)
     - **2024 handller FIX: https://www.reddit.com/r/nucleuscoop/comments/t18dfa/comment/l7sr244/**
 * Local server only: [YouTube - video guide](https://youtu.be/YmW9K6GjY9w)
-
-#### **Q2:** I run a FiveM server, can I use this script online?
-
-**A2:** Yes, ~~it will work. But be warned, this script was intended for local host use and therefore does not employ any anti-cheat/hack preventions, given that this script is intended to provide a safe gaming experience for children, I highly recommend that you look into adding safety nets via a third party script(s).~~
-
-As of version 0.2.1, there are anti-cheat/hack preventions, see ```NETWORK_PROTECTION``` in the ```config.lua``` to prevent players spawning in inappropriate vehicles/peds/objects, and to ensure they're not tampering with the client script.
