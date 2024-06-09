@@ -65,9 +65,9 @@ set sv_enforceGameBuild 2189
 
 ## FAQ
 
-#### **Q1:** Can I run this mod locally without running a server?
+#### **Q1:** Can I run this mod locally without owning/running a server?
 
-**A1:** While it is possible to run scripts in FiveM without a server environment, it's not recommended. Check out the following guides to get a local server set up on your PC (accessible by computers on your local network):
+**A1:** While it is possible to run scripts in FiveM without a server environment, it's not recommended. Check out the following guides to get a local server set up on your PC (free, accessible by computers on your local network):
 
 * Local server with split-screen/dual screen support:
     - [YouTube - video guide](https://youtu.be/BvIIO0J50Zk)
