@@ -68,6 +68,11 @@ end)
 
 RegisterNetEvent("SetTimer")
 AddEventHandler('SetTimer', function(Time)
+	if type(Time) ~= "number" or Time ~= Time or Time <= -math.huge or Time >= math.huge or Time < -1 then
+		d_print("Rejected invalid timer value from player:  " .. source, 3)
+		return
+	end
+
 	d_print(("Timer set: %s from %i"):format(Time, source), 3)
 	
 	local NewTime = Time
@@ -104,6 +109,8 @@ end
 
 RegisterNetEvent("PauseTimer")
 AddEventHandler('PauseTimer', function(Pause)
+	if type(Pause) ~= "boolean" then return end
+
 	d_print(('Player paused? %s player %i'):format(Pause, source), 3)
 	
 	if Pause and not DoesSetContain(PlayersPaused, source, true) then AddToSet(PlayersPaused, source, nil, true)
@@ -130,6 +137,8 @@ end
 
 RegisterNetEvent("ForcePausePlayers")
 AddEventHandler('ForcePausePlayers', function(Pause)
+	if type(Pause) ~= "boolean" then return end
+
 	print(('Force players pause? %s from player %i'):format(Pause, source))
 	if TimeRemaining > 0 then
 		ForcePauseEveryone = Pause
@@ -157,8 +166,8 @@ function IllegalPlayerPed(Player, Type)
 	d_print("Player: " .. Player .. " has an illegal player ped model loaded! " .. TypeStr, 3)
 	
 	local NewModelHash = nil
-	if LastActivePlayersUpdate[NetPlayer] ~= nil then
-		NewModelHash = LastActivePlayersUpdate[NetPlayer].ped_model
+	if LastActivePlayersUpdate[Player] ~= nil then
+		NewModelHash = LastActivePlayersUpdate[Player].ped_model
 	elseif CONFIG.NETWORK_PROTECTION.trusted_ped_models_only
 		and next(SPAWN_ITEMS.PEDS) ~= nil then
 			local Model, Name = next(SPAWN_ITEMS.PEDS)
@@ -170,37 +179,60 @@ function IllegalPlayerPed(Player, Type)
 	SetPlayerPed(Player, {
 		model_hash = NewModelHash,
 		model_name = "reverted to a trusted model (:",
-		vehicle = 0,
+		vehicle_net_id = 0,
 		seat = -2
 	})
 end
 
 function SetPlayerPed(Player, Data)
-	local Error, Type = not IsPedModelLegal(Data.model_hash)
-	
-	if not Error then
-		local PlayerPed = GetPlayerPed(Player)
-		local OldModel = GetEntityModel(PlayerPed)
-		SetPlayerModel(Player, Data.model_hash)
-		
-		local NewModel = GetEntityModel(PlayerPed)
-		while NewModel == OldModel do
-			NewModel = GetEntityModel(PlayerPed)
-			Citizen.Wait(100)
-		end
-		
-		if LastActivePlayersUpdate[Player] ~= nil then
-			LastActivePlayersUpdate[Player].ped_model = GetEntityModel(PlayerPed)
-		end
-		
-		if IsVarSetTrue(Data.vehicle) then
-			TaskWarpPedIntoVehicle(PlayerPed, Data.vehicle, Data.seat)
-		end
-		
-		TriggerClientEvent("SpawnServerDecision", Player, {type = 0, error = false, decision = "Player model changed to:  ~g~" .. Data.model_name})
-	else
-		TriggerClientEvent("SpawnServerDecision", Player, {type = 0, error = true, decision = "not a permitted ped model."})
+	if type(Data) ~= "table" or type(Data.model_hash) ~= "number" then
+		TriggerClientEvent("SpawnServerDecision", Player, {type = 0, error = true, decision = "invalid ped request."})
+		return
 	end
+
+	local Legal = IsPedModelLegal(Data.model_hash)
+	if not Legal then
+		TriggerClientEvent("SpawnServerDecision", Player, {type = 0, error = true, decision = "not a permitted ped model."})
+		return
+	end
+
+	local PlayerPed = GetPlayerPed(Player)
+	if not DoesEntityExist(PlayerPed) then
+		TriggerClientEvent("SpawnServerDecision", Player, {type = 0, error = true, decision = "player ped was not available."})
+		return
+	end
+
+	if GetEntityModel(PlayerPed) ~= Data.model_hash then
+		SetPlayerModel(Player, Data.model_hash)
+
+		local Timeout = GetGameTimer() + 5000
+		repeat
+			Citizen.Wait(50)
+			PlayerPed = GetPlayerPed(Player)
+		until (DoesEntityExist(PlayerPed) and GetEntityModel(PlayerPed) == Data.model_hash)
+			or GetGameTimer() >= Timeout
+
+		if not DoesEntityExist(PlayerPed) or GetEntityModel(PlayerPed) ~= Data.model_hash then
+			TriggerClientEvent("SpawnServerDecision", Player, {type = 0, error = true, decision = "ped model change timed out."})
+			return
+		end
+	end
+
+	if LastActivePlayersUpdate[Player] ~= nil then
+		LastActivePlayersUpdate[Player].ped_model = GetEntityModel(PlayerPed)
+	end
+
+	if type(Data.vehicle_net_id) == "number"
+		and Data.vehicle_net_id > 0
+		and NetworkDoesEntityExistWithNetworkId(Data.vehicle_net_id) then
+			local Vehicle = NetworkGetEntityFromNetworkId(Data.vehicle_net_id)
+			if DoesEntityExist(Vehicle) then
+				TaskWarpPedIntoVehicle(PlayerPed, Vehicle, tonumber(Data.seat) or -1)
+			end
+	end
+
+	local ModelName = type(Data.model_name) == "string" and Data.model_name or tostring(Data.model_hash)
+	TriggerClientEvent("SpawnServerDecision", Player, {type = 0, error = false, decision = "Player model changed to:  ~g~" .. ModelName})
 end
 
 RegisterNetEvent("ChangePlayerPed")
@@ -208,17 +240,63 @@ AddEventHandler('ChangePlayerPed', function(Data)
 	SetPlayerPed(source, Data)
 end)
 
+function IsFiniteNumber(Value)
+	return type(Value) == "number" and Value == Value and Value > -math.huge and Value < math.huge
+end
+
+function RejectVehicleSpawn(Player, Reason)
+	TriggerClientEvent("SpawnServerDecision", Player, {type = 1, error = true, decision = Reason})
+end
+
 local SpawnedVehicles = {}
 RegisterNetEvent("SpawnVehicle")
 AddEventHandler('SpawnVehicle', function(Data)
 	local ModelHash = nil
 	local IsClone = false
 	local Player = source
+	local PlayerPed = GetPlayerPed(Player)
+	local QuickSpawn = Data and Data.quick_spawn == true
+	local TeleportInside = Data and Data.teleport_inside == true
+	local RequestedSpeed = Data and IsFiniteNumber(Data.speed) and Data.speed or 0.0
+
+	if type(Data) ~= "table" or type(Data.coords) ~= "table" or not DoesEntityExist(PlayerPed) then
+		RejectVehicleSpawn(Player, "invalid vehicle spawn request.")
+		return
+	end
+
+	if not IsFiniteNumber(Data.coords.x) or not IsFiniteNumber(Data.coords.y)
+		or not IsFiniteNumber(Data.coords.z) or not IsFiniteNumber(Data.heading) then
+			RejectVehicleSpawn(Player, "invalid vehicle spawn position.")
+			return
+	end
+
+	local PlayerCoords = GetEntityCoords(PlayerPed)
+	local DeltaX = Data.coords.x - PlayerCoords.x
+	local DeltaY = Data.coords.y - PlayerCoords.y
+	local DeltaZ = Data.coords.z - PlayerCoords.z
+	if (DeltaX * DeltaX) + (DeltaY * DeltaY) + (DeltaZ * DeltaZ) > 10000.0 then
+		RejectVehicleSpawn(Player, "vehicle spawn position is too far from the player.")
+		return
+	end
 	
 	if IsVarSetTrue(Data.force_model) then
+		if type(Data.force_model) ~= "string" or SPAWN_ITEMS.VEHICLES[Data.force_model] == nil then
+			RejectVehicleSpawn(Player, "vehicle model is not permitted.")
+			return
+		end
 		ModelHash = GetHashKey(Data.force_model)
 	else
-		ModelHash = GetEntityModel(NetworkGetEntityFromNetworkId(Data.clone_entity))
+		if type(Data.clone_entity) ~= "number"
+			or not NetworkDoesEntityExistWithNetworkId(Data.clone_entity) then
+				RejectVehicleSpawn(Player, "vehicle to clone is not available.")
+				return
+		end
+		local CloneEntity = NetworkGetEntityFromNetworkId(Data.clone_entity)
+		if not DoesEntityExist(CloneEntity) or GetEntityType(CloneEntity) ~= 2 then
+			RejectVehicleSpawn(Player, "entity to clone is not a vehicle.")
+			return
+		end
+		ModelHash = GetEntityModel(CloneEntity)
 		IsClone = true
 	end
 	
@@ -228,7 +306,7 @@ AddEventHandler('SpawnVehicle', function(Data)
 			anti_flood = {}
 		})
 	end
-	if Data.quick_spawn and DoesEntityExist(SpawnedVehicles[Player].quick_spawn) then
+	if QuickSpawn and DoesEntityExist(SpawnedVehicles[Player].quick_spawn) then
 		if not DoesEntityExist(GetLastPedInVehicleSeat(SpawnedVehicles[Player].quick_spawn, -1)) then
 			DeleteEntity(SpawnedVehicles[Player].quick_spawn)
 		else table.insert(SpawnedVehicles[Player].anti_flood, SpawnedVehicles[Player].quick_spawn) end
@@ -251,18 +329,24 @@ AddEventHandler('SpawnVehicle', function(Data)
 	end
 	
 	local SpawnVeh = CreateVehicle(ModelHash, Data.coords.x, Data.coords.y, Data.coords.z, Data.heading, true, false)
-	if Data.teleport_inside then TaskWarpPedIntoVehicle(Player, SpawnVeh, -1) end
 	d_print("Vehicle spawned as per request of player:  " .. Player .. ", hash:  " .. ModelHash, 2)
 	
-	while not DoesEntityExist(SpawnVeh) do
+	local SpawnTimeout = GetGameTimer() + 10000
+	while SpawnVeh ~= 0 and not DoesEntityExist(SpawnVeh) and GetGameTimer() < SpawnTimeout do
 		Citizen.Wait(100)
+	end
+	if SpawnVeh == 0 or not DoesEntityExist(SpawnVeh) then
+		RejectVehicleSpawn(Player, "vehicle creation failed or timed out.")
+		return
 	end
 	
 	SetRoutingBucket(nil, SpawnVeh)
-	if Data.quick_spawn then SpawnedVehicles[Player].quick_spawn = SpawnVeh
+	if TeleportInside then TaskWarpPedIntoVehicle(PlayerPed, SpawnVeh, -1) end
+	if QuickSpawn then SpawnedVehicles[Player].quick_spawn = SpawnVeh
 	else table.insert(SpawnedVehicles[Player].anti_flood, SpawnVeh) end
 	
-	TriggerClientEvent("SpawnServerDecision", Player, {type = 1, error = false, decision = "Vehicle spawned:  ~g~" .. Data.model_name, entity = NetworkGetNetworkIdFromEntity(SpawnVeh), is_a_clone = IsClone, is_quick_spawn = Data.quick_spawn, speed = Data.speed})
+	local ModelName = type(Data.model_name) == "string" and Data.model_name:sub(1, 80) or tostring(ModelHash)
+	TriggerClientEvent("SpawnServerDecision", Player, {type = 1, error = false, decision = "Vehicle spawned:  ~g~" .. ModelName, entity = NetworkGetNetworkIdFromEntity(SpawnVeh), is_a_clone = IsClone, is_quick_spawn = QuickSpawn, speed = RequestedSpeed})
 	
 	d_print("Vehicles spawned by player:  " .. Player .. ",  " .. dump(SpawnedVehicles), 2)
 end)
@@ -270,6 +354,8 @@ end)
 
 RegisterNetEvent("PlayerToggleGhost")
 AddEventHandler('PlayerToggleGhost', function(Ghost)
+	if type(Ghost) ~= "boolean" then return end
+
 	if Ghost and not DoesSetContain(PlayersGhosting, source, true) then AddToSet(PlayersGhosting, source, nil, true)
 	elseif not Ghost and DoesSetContain(PlayersGhosting, source, true) then RemoveFromSet(PlayersGhosting, source, true) end
 	
@@ -278,6 +364,9 @@ end)
 
 RegisterNetEvent("GetUpdatedPlayerData")
 AddEventHandler('GetUpdatedPlayerData', function(NetPlayer)
+	if type(NetPlayer) ~= "string" and type(NetPlayer) ~= "number" then return end
+	if GetPlayerName(NetPlayer) == nil then return end
+
 	TriggerClientEvent("UpdatedPlayerData", source, {player = NetPlayer, data = GetNetPlayerData(NetPlayer)})
 end)
 
