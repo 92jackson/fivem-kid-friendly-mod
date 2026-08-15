@@ -1,5 +1,32 @@
 # FiveM Kid Friendly Mod Change List
 
+**v0.3.0**
+* Added configurable replacement of ambient NPC models
+* Expanded and revised the restricted ped model list (thanks to Jaralus)
+* Fixed replacement peds waiting for the wrong model to load
+* Fixed player model changes retaining a stale ped handle
+* Replaced task-clearing fall/vehicle-exit ragdoll prevention with temporary ragdoll suppression
+* Fixed the on-fire ragdoll configuration referencing an undefined ped variable
+* Added independent on-foot NPC flee prevention
+* Prevented panic-driving correction from moving passengers into the driver's seat
+* Fixed vehicle spawning passing a player ID where a ped handle was required
+* Added timeouts and validation to player model and vehicle spawn requests
+* Added basic validation to server network events
+* Updated controller key mappings to use FiveM's analog-button mapper for better compatibility
+* Changed `HOTKEY_VER` to `_v2` so the updated controller defaults reach existing installations without conflicting with `_ver2`
+* Corrected the `max_wanted_level` and `prevent_visual_carjack_passengers` config names
+* Fixed loading-screen handover checks, dynamic text escaping and mixed-content font loading
+* Replaced fixed loading-screen tab options with an ordered, extensible `tabs` array
+* Updated the resource manifest version and declared OneSync/game build requirements
+* Added a base-game configuration example with all optional modifications disabled
+* Added a content-filter configuration example with reduced gore and non-destructive weapons
+* Disabled default loading screen background video
+
+Loading-screen migration: replace the old `show_tab_*` and `server_*` tab-content
+settings with entries in `LS_CONFIG.tabs`. A tab's position in the array determines
+its display order; remove its object to hide it. The optional `pin_to_bottom` and
+`exclude_from_auto_scroll` properties replace the previous hard-coded mod-tab behaviour.
+
 **v0.2.3**
 * Fixed not teleporting inside of spawned vehicles when VEHICLES.teleport_inside_spawned is set true
 * Short wait added when spawning new vehicles after purging a previous to help reduce collisions

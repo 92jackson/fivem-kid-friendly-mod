@@ -1,6 +1,6 @@
 # MIT License
 
-FiveM Kid Friendly Mod, **Copyright (c) 2022 CRAIG JACKSON**
+FiveM Kid Friendly Mod, Copyright (c) 2026 92jackson
 
 https://github.com/92jackson/fivem-kid-friendly-mod
 

@@ -63,6 +63,18 @@ For updates, support and suggestions, join the [Discord](https://discord.gg/e3eX
 set sv_enforceGameBuild 2189
 ```
 
+## Configuration profiles
+
+The included configuration files provide three starting points:
+
+* `config.lua` - the default strict, kid-friendly configuration
+* `base-game.config.lua` - disables the mod's optional changes, providing a clean slate close to the base game
+* `content-filter.config.lua` - removes gore and disturbing content while allowing a small selection of non-destructive weapons
+
+To use an example, make a backup of your existing `config.lua`, copy the chosen profile over it and rename the copy to `config.lua`. The example files are not loaded automatically. Restart the resource after changing the configuration.
+
+Profiles with `LOADING_SCREEN.loading_screen_enabled` set to `false` also require the `loadscreen` entry in `fxmanifest.lua` to be commented out or removed if you do not want FiveM to load the custom loading screen.
+
 ## FAQ
 
 #### **Q1:** Can I run this mod locally without owning/running a server?
@@ -70,9 +82,7 @@ set sv_enforceGameBuild 2189
 **A1:** While it is possible to run scripts in FiveM without a server environment, it's not recommended. Check out the following guides to get a local server set up on your PC (free, accessible by computers on your local network):
 
 * Local server with split-screen/dual screen support:
-    - [YouTube - video guide](https://youtu.be/BvIIO0J50Zk) (ignore any client setup instructions and see 2026 handler below)
-    - [Reddit - written guide](https://www.reddit.com/r/nucleuscoop/comments/t18dfa/comment/hyee5nd/?utm_source=share&utm_medium=web2x&context=3) (ignore any client setup instructions and see 2026 handler below)
-    - ~2024 handler FIX: https://www.reddit.com/r/nucleuscoop/comments/t18dfa/comment/l7sr244/~ **<- No longer maintained by the dev and has long since been broken! Check out my new working handler:**
-  
-    [2026 Nucleus Co-op handler](https://github.com/92jackson/FiveM-Nucleus-Coop-Handler) - works with any recent FiveM client release!
+    - [YouTube - video guide](https://youtu.be/BvIIO0J50Zk) (ignore any client set-up instructions and see 2026 handler below)
+    - [Reddit - written guide](https://www.reddit.com/r/nucleuscoop/comments/t18dfa/comment/hyee5nd/?utm_source=share&utm_medium=web2x&context=3) (ignore any client set-up instructions and see 2026 handler below)
+    - ~2024 handler FIX: https://www.reddit.com/r/nucleuscoop/comments/t18dfa/comment/l7sr244/~ **<- No longer maintained by the dev and has long since been broken! Check out my new working handler:** [2026 Nucleus Co-op handler](https://github.com/92jackson/FiveM-Nucleus-Coop-Handler) - works with any recent FiveM client release!
 * Local server only: [YouTube - video guide](https://youtu.be/YmW9K6GjY9w)
